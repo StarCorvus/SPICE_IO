@@ -1,0 +1,12 @@
+# Résultats de simulation (volumineux, régénérables)
+*.raw
+*.log
+*.op.raw
+*.exe.log
+sim_out/
+figures/
+
+# Python
+__pycache__/
+*.pyc
+.venv/

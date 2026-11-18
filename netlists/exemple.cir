@@ -1,0 +1,11 @@
+* Exemple de netlist parametree : source alternative -> diode -> stockage C // charge R
+* Les valeurs a balayer sont des .param, referencees entre accolades {...}
+.param rload=1meg cload=100n
+V1 in 0 SINE(0 100 10)
+Rs in a 10k
+D1 a out Dsch
+C1 out 0 {cload}
+R2 out 0 {rload}
+.model Dsch D(Is=1n Rs=1)
+.tran 0 2 0 100u
+.end

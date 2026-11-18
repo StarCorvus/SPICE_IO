@@ -1,0 +1,50 @@
+Teng + Unstable Charge Pump
+
+
+; TENG Parameters
+.param Cmin=100e-12 Cmax=200e-12 VTE=100
+.param Cstore=500p Crect=1n
+.param C_off=(Cmin+Cmax)/2 C_amp=(Cmin-Cmax)/2 Fmeca=100
+.param VD=0.0
+.param Rp=1.0
+
+; TENG Model subcircuit :
+.subckt harmonic_variable_capacitor n_1 n_2 n_e n_ct n_qct n_gnd
+Bct_val n_ct n_gnd v=C_off+C_amp*cos(2*pi*Fmeca*time);V=C_off + C_amp*(4*abs(mod(Fmeca*time,1)-0.5)-1);
+Bct n_1 n_e v=v(n_qct)/v(n_ct)
+Ve n_2 n_e {VTE}
+Bi_ct n_gnd n_qct i=I(Bct)
+Ccap n_qct n_gnd 1.0 ic=0.0
+.ends harmonic_variable_capacitor
+
+.subckt half_wave_circuit n1 n_out n_gnd
+DD1 n_gnd n1 diode
+DD2 n1 n_out diode
+.model diode D (IS=1e-15)
+.ends half_wave_circuit
+
+.subckt bennet_doubler n1 n_out n_gnd
+DD1 n_gnd n2 diode
+Cstore n2 n1 {Cstore} ic=0.0
+DD2 n2 n_out diode
+DD3 n_out n1 diode
+.model diode D (Vfwd=VD);(IS=1e-15)
+.ends half_wave_circuit
+
+Xcvar n_1 0 n_e n_ct n_qct 0 harmonic_variable_capacitor
+Xhw1 n_1 n_out1 0 half_wave_circuit
+Crect n_out1 0 {Crect} ic=0.0
+Rpar n_out1 0 {Rp}
+
+
+BC1 C1 0 V={VTE}*{Cmax}/({VTE}+V(n_out1))
+
+.step dec param Rp 10Meg 1G 1
+.step dec param Fmeca 10 1000 1
+;.step lin param VD 0.0 0.6 0.1
+
+.save V(n_out1)
+
+.tran 0 5s
+
+
